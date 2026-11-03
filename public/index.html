@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Anonymous - Private Chat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- หน้าสร้าง/เข้าห้อง -->
+    <div id="lobby" class="screen active">
+      <div class="pixel-container">
+        <h1 class="pixel-title">🎮 PIXEL ANONYMOUS</h1>
+        <p class="pixel-subtitle">Anonymous • Private • Pixel Art</p>
+        
+        <div class="pixel-box">
+          <button id="createRoomBtn" class="pixel-btn">
+            🆕 สร้างห้องใหม่
+          </button>
+          
+          <div class="pixel-divider">หรือ</div>
+          
+          <input 
+            type="text" 
+            id="chatIdInput" 
+            placeholder="ใส่ Chat ID"
+            maxlength="8"
+            class="pixel-input"
+          >
+          <button id="joinRoomBtn" class="pixel-btn">
+            🚪 เข้าห้อง
+          </button>
+        </div>
+
+        <div class="pixel-info">
+          <p>⚡ ไม่ระบุตัวตน</p>
+          <p>🔒 ข้อมูลลบอัตโนมัติ</p>
+          <p>🎨 Pixel Art Design</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- หน้าแชท -->
+    <div id="chatRoom" class="screen">
+      <div class="chat-header">
+        <div class="room-info">
+          <span class="room-id">Room: <span id="roomIdDisplay"></span></span>
+          <span class="user-count">👥 <span id="userCount">1</span></span>
+        </div>
+        <div class="chat-actions">
+          <button id="callBtn" class="pixel-btn-small">📞 โทร</button>
+          <button id="videoCallBtn" class="pixel-btn-small">📹 วิดีโอ</button>
+          <button id="keepMessagesBtn" class="pixel-btn-small">💾 เก็บแชท</button>
+          <button id="leaveRoomBtn" class="pixel-btn-small">🚪 ออก</button>
+        </div>
+      </div>
+
+      <div id="messagesContainer" class="messages-container">
+        <!-- ข้อความจะแสดงที่นี่ -->
+      </div>
+
+      <div class="chat-input-area">
+        <button id="attachBtn" class="pixel-btn-icon">📎</button>
+        <input 
+          type="text" 
+          id="messageInput" 
+          placeholder="พิมพ์ข้อความ..."
+          class="pixel-input"
+        >
+        <button id="sendBtn" class="pixel-btn-icon">📤</button>
+      </div>
+
+      <!-- File upload hidden -->
+      <input 
+        type="file" 
+        id="fileInput" 
+        accept="image/*,video/*" 
+        style="display: none;"
+      >
+    </div>
+
+    <!-- หน้าเรียก -->
+    <div id="callScreen" class="screen">
+      <div class="call-container">
+        <video id="localVideo" autoplay muted playsinline></video>
+        <video id="remoteVideo" autoplay playsinline></video>
+        <div class="call-controls">
+          <button id="muteBtn" class="pixel-btn-small">🔇 Mute</button>
+          <button id="endCallBtn" class="pixel-btn-small">📴 จบการโทร</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
