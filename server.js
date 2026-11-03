@@ -15,27 +15,30 @@ app.use(express.json({ limit: '10mb' }));
 
 // เก็บข้อมูลห้องแชทใน memory
 const rooms = new Map();
-const MAX_CHAT_DURATION = 72 * 60 * 60 * 1000; // 72 ชั่วโมง
+const ROOM_DURATION = 24 * 60 * 60 * 1000; // ✅ 24 ชั่วโมง (แทนที่จะลบเมื่อคนออก)
 const AUTO_DELETE_DURATION = 24 * 60 * 60 * 1000; // 24 ชั่วโมง
 
 // สร้างห้องแชทใหม่
 app.post('/create-room', (req, res) => {
   const chatId = uuidv4().substring(0, 8).toUpperCase();
-  rooms.set(chatId, {
+  const room = {
     id: chatId,
     createdAt: Date.now(),
     users: new Set(),
     messages: [],
     keepMessages: false
-  });
+  };
+  
+  rooms.set(chatId, room);
 
-  // ตั้งเวลาลบอัตโนมัติ (72 ชม.)
+  // ✅ ตั้งเวลาลบห้องหลัง 24 ชม. (ไม่ว่าจะมีคนอยู่หรือไม่)
   setTimeout(() => {
     if (rooms.has(chatId)) {
       rooms.delete(chatId);
       io.to(chatId).emit('room-deleted');
+      console.log(`🗑️ Room ${chatId} deleted after 24 hours`);
     }
-  }, MAX_CHAT_DURATION);
+  }, ROOM_DURATION);
 
   res.json({ chatId });
 });
@@ -62,7 +65,7 @@ io.on('connection', (socket) => {
     socket.join(chatId);
     room.users.add(socket.id);
 
-    // ✨ ส่ง anonymousId กลับให้ client เพื่อให้แยกฝั่งข้อความได้
+    // ส่ง anonymousId กลับให้ client
     socket.emit('your-id', anonymousId);
 
     // ส่งประวัติแชทให้ผู้ใช้ใหม่
@@ -72,6 +75,8 @@ io.on('connection', (socket) => {
     // แจ้งผู้ใช้คนอื่น
     socket.to(chatId).emit('user-joined', anonymousId);
     io.to(chatId).emit('user-count', room.users.size);
+    
+    console.log(`👤 ${anonymousId} joined room ${chatId} (${room.users.size} users)`);
   });
 
   // รับข้อความ
@@ -107,43 +112,17 @@ io.on('connection', (socket) => {
     rooms.get(currentRoom).keepMessages = keep;
   });
 
-  // WebRTC signaling
-  socket.on('webrtc-offer', (data) => {
-    socket.to(data.target).emit('webrtc-offer', {
-      offer: data.offer,
-      sender: socket.id
-    });
-  });
-
-  socket.on('webrtc-answer', (data) => {
-    socket.to(data.target).emit('webrtc-answer', {
-      answer: data.answer,
-      sender: socket.id
-    });
-  });
-
-  socket.on('webrtc-ice', (data) => {
-    socket.to(data.target).emit('webrtc-ice', {
-      candidate: data.candidate,
-      sender: socket.id
-    });
-  });
-
-  // ออกจากห้อง
+  // ออกจากห้อง (✅ ไม่ลบห้องทันที แม้จะไม่มีคน)
   socket.on('leave-room', () => {
     if (currentRoom && rooms.has(currentRoom)) {
       const room = rooms.get(currentRoom);
       room.users.delete(socket.id);
       socket.to(currentRoom).emit('user-left', anonymousId);
       io.to(currentRoom).emit('user-count', room.users.size);
-
-      // ลบห้องถ้าไม่มีคนแล้ว (รอ 5 วินาที)
-      const roomId = currentRoom;
-      setTimeout(() => {
-        if (rooms.has(roomId) && rooms.get(roomId).users.size === 0) {
-          rooms.delete(roomId);
-        }
-      }, 5000);
+      
+      console.log(` ${anonymousId} left room ${currentRoom} (${room.users.size} users left)`);
+      
+      // ✅ ไม่ลบห้อง แม้จะไม่มีคน (รอจนครบ 24 ชม.)
     }
   });
 
@@ -153,19 +132,16 @@ io.on('connection', (socket) => {
       room.users.delete(socket.id);
       socket.to(currentRoom).emit('user-left', anonymousId);
       io.to(currentRoom).emit('user-count', room.users.size);
-
-      const roomId = currentRoom;
-      setTimeout(() => {
-        if (rooms.has(roomId) && rooms.get(roomId).users.size === 0) {
-          rooms.delete(roomId);
-        }
-      }, 5000);
+      
+      console.log(`❌ ${anonymousId} disconnected from ${currentRoom}`);
+      
+      // ✅ ไม่ลบห้อง แม้จะไม่มีคน (รอจนครบ 24 ชม.)
     }
   });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🎮 Pixel Anonymous running on port ${PORT}`);
   console.log(`🌐 เปิดเบราว์เซอร์ที่: http://localhost:${PORT}`);
 });

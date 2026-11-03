@@ -14,6 +14,7 @@ body {
   justify-content: center;
   align-items: center;
   image-rendering: pixelated;
+  overflow-x: hidden;
 }
 
 #app {
@@ -25,6 +26,73 @@ body {
   overflow: hidden;
   border: 4px solid #000;
   box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 768px) {
+  #app {
+    height: 100vh;
+    max-width: 100%;
+    border: none;
+  }
+  
+  .pixel-title {
+    font-size: 20px !important;
+  }
+  
+  .pixel-subtitle {
+    font-size: 8px !important;
+  }
+  
+  .pixel-btn {
+    font-size: 10px !important;
+    padding: 12px 20px !important;
+  }
+  
+  .pixel-input {
+    font-size: 10px !important;
+    padding: 10px !important;
+  }
+  
+  .chat-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 10px !important;
+  }
+  
+  .chat-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .pixel-btn-small {
+    font-size: 6px !important;
+    padding: 6px 8px !important;
+  }
+  
+  .agent-area {
+    height: 150px !important;
+  }
+  
+  .agent-character {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .message {
+    font-size: 8px !important;
+    padding: 8px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .pixel-container {
+    padding: 15px !important;
+  }
+  
+  .pixel-box {
+    padding: 20px !important;
+  }
 }
 
 .screen {
@@ -46,11 +114,14 @@ body {
   justify-content: center;
   align-items: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow-y: auto;
 }
 
 .pixel-container {
   text-align: center;
   padding: 20px;
+  width: 100%;
+  max-width: 500px;
 }
 
 .pixel-title {
@@ -92,6 +163,8 @@ body {
   margin: 10px;
   transition: all 0.1s;
   box-shadow: 4px 4px 0 #000;
+  width: 100%;
+  max-width: 300px;
 }
 
 .pixel-btn:hover {
@@ -191,6 +264,88 @@ body {
   background: #ff6b9d;
 }
 
+/* ✅ Pixel Agent Area */
+.agent-area {
+  background: linear-gradient(180deg, #2d3561 0%, #1a1a2e 100%);
+  border-bottom: 4px solid #000;
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+#agentsContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.agent-character {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  transition: all 0.5s ease;
+  cursor: pointer;
+}
+
+.agent-sprite {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  animation: idle 2s infinite;
+}
+
+/* Pixel Agent Colors */
+.agent-0 { background: #ff6b6b; }
+.agent-1 { background: #4ecdc4; }
+.agent-2 { background: #ffe66d; }
+.agent-3 { background: #95e1d3; }
+.agent-4 { background: #f38181; }
+.agent-5 { background: #aa96da; }
+
+@keyframes idle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.agent-walking {
+  animation: walk 0.5s infinite !important;
+}
+
+@keyframes walk {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-5px) rotate(5deg); }
+}
+
+.agent-speech-bubble {
+  position: absolute;
+  bottom: 55px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 10px;
+  padding: 8px;
+  font-size: 8px;
+  max-width: 150px;
+  text-align: center;
+  white-space: normal;
+  word-wrap: break-word;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+  z-index: 10;
+  display: none;
+}
+
+.agent-speech-bubble.show {
+  display: block;
+  animation: popIn 0.3s;
+}
+
+@keyframes popIn {
+  0% { transform: translateX(-50%) scale(0); opacity: 0; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* Messages */
 .messages-container {
   flex: 1;
   overflow-y: auto;
@@ -200,7 +355,6 @@ body {
   gap: 12px;
 }
 
-/* ✨ ข้อความ - แยกสีชัดเจน */
 .message {
   max-width: 75%;
   padding: 12px 15px;
@@ -213,7 +367,6 @@ body {
   line-height: 1.6;
 }
 
-/* ✨ ข้อความฝั่งเรา (ขวา) - สีแดงชมพูสด */
 .message.sent {
   align-self: flex-end;
   background: linear-gradient(135deg, #ff2d55 0%, #ff6b9d 100%);
@@ -221,22 +374,11 @@ body {
   border-radius: 12px 12px 0 12px;
 }
 
-.message.sent .message-sender {
-  color: #fffacd;
-  text-shadow: 1px 1px 0 #000;
-}
-
-/* ✨ ข้อความฝั่งคนอื่น (ซ้าย) - สีน้ำเงินเข้ม */
 .message.received {
   align-self: flex-start;
   background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
   border-color: #1e40af;
   border-radius: 12px 12px 12px 0;
-}
-
-.message.received .message-sender {
-  color: #00ff88;
-  text-shadow: 1px 1px 0 #000;
 }
 
 .message-sender {
@@ -251,14 +393,6 @@ body {
   color: rgba(255,255,255,0.7);
   margin-top: 6px;
   text-align: right;
-}
-
-.message img,
-.message video {
-  max-width: 100%;
-  border: 2px solid #000;
-  margin-top: 5px;
-  border-radius: 4px;
 }
 
 .chat-input-area {
@@ -287,46 +421,6 @@ body {
   flex: 1;
 }
 
-/* Call Screen */
-#callScreen {
-  background: #000;
-  justify-content: center;
-  align-items: center;
-}
-
-.call-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-#localVideo,
-#remoteVideo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-#localVideo {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 150px;
-  height: 150px;
-  border: 4px solid #fff;
-  z-index: 10;
-}
-
-.call-controls {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 15px;
-  z-index: 10;
-}
-
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
@@ -339,20 +433,4 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #e94560;
   border: 2px solid #000;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .pixel-title {
-    font-size: 20px;
-  }
-  
-  .chat-actions {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .message {
-    max-width: 85%;
-  }
 }
